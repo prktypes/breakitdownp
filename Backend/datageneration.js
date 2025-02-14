@@ -16,6 +16,7 @@ async function run() {
   const result = await model.generateContent(prompt);
   const responseText = await result.response.text();
   const cleanedText = responseText.replace(/```json|```/g, "").trim();
+  console.log(cleanedText);
   return cleanedText;
 }
 
