@@ -62,84 +62,79 @@ function StudyPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <h1 className="text-5xl font-serif w-full rounded-xl py-4 text-center">
-        BreakItDown
-      </h1>
-      <div className="flex-1 flex justify-center items-center font-serif">
-        <Card className="w-[400px] text-center">
-          <CardHeader>
-            <CardTitle>
-              {currentSection.type === "teaching" ? "Teaching" : currentSection.type === "question" ? "Question" : "Upcoming Content"}
-            </CardTitle>
-            <CardDescription>
-              {currentSection.type === "question" ? "Quiz Time!" : currentSection.type === "teaching" ? "Learn Something New" : "Stay Tuned!"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {currentSection.type === "teaching" && <p>{currentSection.content}</p>}
+    <div className="relative flex-1 flex justify-center items-center">
+      <Card className="w-[400px] text-center bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-black/90 font-newstar">
+            {currentSection.type === "teaching" ? "Teaching" : currentSection.type === "question" ? "Question" : "Upcoming Content"}
+          </CardTitle>
+          <CardDescription className="text-black/70 font-newstar">
+            {currentSection.type === "question" ? "Quiz Time!" : currentSection.type === "teaching" ? "Learn Something New" : "Stay Tuned!"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {currentSection.type === "teaching" && <p className="text-black/80 font-serif">{currentSection.content}</p>}
 
-            {currentSection.type === "question" && (
-              <div>
-                <p className="font-semibold">{currentSection.question}</p>
-                <ul className="mt-2">
-                  {currentSection.options.map((option, index) => (
-                    <li 
-                      key={index} 
-                      className={`p-2 border rounded-md cursor-pointer mb-2 
-                        ${!selectedOption 
-                          ? 'bg-gray-200 hover:bg-gray-300' // Initial state: gray with darker hover
-                          : selectedOption === option
-                            ? option === currentSection.answer
-                              ? 'bg-green-200 hover:bg-green-300' // Correct answer: green with darker hover
-                              : 'bg-red-200 hover:bg-red-300' // Wrong answer: red with darker hover
-                            : 'bg-gray-200 hover:bg-gray-300' // Unselected options stay gray
-                        }`}
-                      onClick={() => handleOptionClick(option)}
-                    >
-                      {option}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {currentSection.type === "upcoming-content" && (
-              <div>
-                <p className="font-semibold">Upcoming Content</p>
-                <ul className="mt-2">
-                  {data.upcoming_topics.map((topic, index) => (
-                    <li key={index} className="p-2 border rounded-md mb-2">
-                      {topic}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter>
-            <div className="flex justify-between w-full px-6 py-2">
-              <Button 
-                variant="outline" 
-                onClick={handlePrevious} 
-                disabled={currentIndex === 0}
-              >
-                Previous
-              </Button>
-              <Button variant="outline">
-                <Bookmark className="mr-2" />
-                Save
-              </Button>
-              <Button 
-                onClick={handleNext} 
-                disabled={currentIndex === data.sections.length - 1}
-              >
-                Next
-              </Button>
+          {currentSection.type === "question" && (
+            <div>
+              <p className="font-semibold text-black/90 font-newstar">{currentSection.question}</p>
+              <ul className="mt-2">
+                {currentSection.options.map((option, index) => (
+                  <li 
+                    key={index} 
+                    className={`p-2 border rounded-md cursor-pointer mb-2 backdrop-blur-sm font-serif
+                      ${!selectedOption 
+                        ? 'bg-gray-200/30 hover:bg-gray-300/30'
+                        : selectedOption === option
+                          ? option === currentSection.answer
+                            ? 'bg-green-200/30 hover:bg-green-300/30'
+                            : 'bg-red-200/30 hover:bg-red-300/30'
+                          : 'bg-gray-200/30 hover:bg-gray-300/30'
+                      }`}
+                    onClick={() => handleOptionClick(option)}
+                  >
+                    {option}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </CardFooter>
-        </Card>
-      </div>
+          )}
+
+          {currentSection.type === "upcoming-content" && (
+            <div>
+              <p className="font-semibold">Upcoming Content</p>
+              <ul className="mt-2">
+                {data.upcoming_topics.map((topic, index) => (
+                  <li key={index} className="p-2 border rounded-md mb-2">
+                    {topic}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <div className="flex justify-between w-full px-6 py-2">
+            <Button 
+              variant="outline" 
+              onClick={handlePrevious} 
+              disabled={currentIndex === 0}
+            >
+              Previous
+            </Button>
+            <Button variant="outline">
+              <Bookmark className="mr-2" />
+              Save
+            </Button>
+            <Button 
+              onClick={handleNext} 
+              disabled={currentIndex === data.sections.length - 1}
+            >
+              Next
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

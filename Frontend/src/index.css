@@ -64,3 +64,9 @@
     @apply bg-background text-foreground;
   }
 }
+@font-face {
+  font-family: 'Newstar';
+  src: url('/Newstar.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
