@@ -23,19 +23,29 @@ function StudyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
-
+  const [subject, setSubject] = useState(null);
+  const [topic, setTopic] = useState(null);
+  const [additionalReq, setAdditionalReq] = useState(null);
   useEffect(() => {
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data);
-        setLoading(false);
+    // if (subject && topic && additionalReq) {
+      fetch(API_URL, {
+        headers: {
+          'subject': subject,
+          'topic': topic,
+          'additionalReq': additionalReq
+        }
       })
-      .catch((err) => {
-        setError(err);
-        setLoading(false);
-      });
-  }, []);
+        .then((res) => res.json())
+        .then((data) => {
+          setData(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err);
+          setLoading(false);
+        });
+    // }
+  }, [subject, topic, additionalReq]);
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-lg text-red-500">Error loading data.</p>;
@@ -65,10 +75,9 @@ function StudyPage() {
       console.log("Incorrect answer!");
     }
   };
-  const upcomingHandler = () => {
-    console.log("Upcoming Content");
-
-  }
+  const handleUpcomingTopicClick = (subject,topic,additionalReq) => {
+    console.log(subject,topic,additionalReq);
+  };
   return (
     <div className="relative flex-1 flex justify-center items-center">
       {loading ? (
@@ -122,7 +131,7 @@ function StudyPage() {
                 <p className="font-semibold">Upcoming Content</p>
                 <ul className="mt-2">
                   {currentSection.upcoming_topics.map((topic, index) => (
-                    <Button variant='ghost'key={index} className="p-2 border rounded-md mb-2" onClick={upcomingHandler()}>
+                    <Button variant='ghost'key={index} className="p-2 border rounded-md mb-2" onClick={() =>{setTopic(topic); fetch(API_URL,{headers:{'subject': subject,'topic': topic,'additionalReq': additionalReq}})}} >
                       {topic}
                     </Button>
                   ))}

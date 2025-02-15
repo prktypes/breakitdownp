@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StudyPage from "./pages/StudyPage";
 import { Button } from "@/components/ui/button";
+
 function App() {
   return (
     <Router>
