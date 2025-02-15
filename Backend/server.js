@@ -23,7 +23,10 @@ app.use(
 // Define an API route
 app.get("/api/data", async (req, res) => {
   try {
-    const content = await datageneration(); // Get data
+    const subject = req.headers["subject"];
+    const topic = req.headers["topic"];
+    const additionalReq = req.headers["additionalReq"];
+    const content = await datageneration(subject, topic, additionalReq); // Get data
     const jsonData = JSON.parse(content); // Convert string to JSON
     res.json(jsonData); // Send proper JSON response
   } catch (error) {

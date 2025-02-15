@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StudyPage from "./pages/StudyPage";
 import { Button } from "@/components/ui/button";
-
 function App() {
   return (
     <Router>
@@ -44,13 +43,14 @@ function App() {
 
 function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
-      <h1 className="text-5xl mb-6 font-newstar">Welcome to BreakItDown</h1>
+    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center selection:bg-yellow-300">
+      <h1 className="text-5xl mb-6 font-newstar">Welcome to <span className="bg-yellow-300 ">BreakItDown</span></h1>
       <p className="text-xl text-black/80 mb-8 max-w-2xl font-newstar">
         Your personalized learning platform that breaks down complex topics into simple, digestible pieces.
       </p>
       <Link to="/study">
-        <Button className="text-lg px-6 py-2 font-newstar">
+      
+        <Button >
           Start Learning
         </Button>
       </Link>

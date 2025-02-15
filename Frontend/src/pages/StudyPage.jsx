@@ -65,7 +65,10 @@ function StudyPage() {
       console.log("Incorrect answer!");
     }
   };
+  const upcomingHandler = () => {
+    console.log("Upcoming Content");
 
+  }
   return (
     <div className="relative flex-1 flex justify-center items-center">
       {loading ? (
@@ -114,14 +117,14 @@ function StudyPage() {
               </div>
             )}
 
-            {currentSection.type === "upcoming-content" && (
+            {currentSection.type === "upcoming_content" && (
               <div>
                 <p className="font-semibold">Upcoming Content</p>
                 <ul className="mt-2">
-                  {data.upcoming_topics.map((topic, index) => (
-                    <li key={index} className="p-2 border rounded-md mb-2">
+                  {currentSection.upcoming_topics.map((topic, index) => (
+                    <Button variant='ghost'key={index} className="p-2 border rounded-md mb-2" onClick={upcomingHandler()}>
                       {topic}
-                    </li>
+                    </Button>
                   ))}
                 </ul>
               </div>
