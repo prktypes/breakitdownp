@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StudyPage from "./pages/StudyPage";
+import AdminDashboard from "./pages/AdminDashboard"; // Import the AdminDashboard component
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -31,6 +32,19 @@ function App() {
                     Study
                   </Link>
                 </li>
+                <li>
+                  <Link 
+                    to="/dashboard" 
+                    className="text-black/80 hover:text-black transition-colors"
+                  >
+                  </Link>
+                  <Link 
+                    to="/admin" 
+                    className="text-black/80 hover:text-black transition-colors"
+                  >
+                    DashBoard
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -56,6 +70,7 @@ function App() {
                 additionalReq={additionalReq} 
               />
             } />
+            <Route path="/admin" element={<AdminDashboard />} /> {/* Add Admin Dashboard Route */}
           </Routes>
         </main>
       </div>
