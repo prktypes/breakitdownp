@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
 import {
@@ -17,39 +17,49 @@ jellyTriangle.register()
 
 const API_URL = "http://localhost:3000/api/data";
 
-function StudyPage() {
+function StudyPage({ subject, topic, setTopic, additionalReq }) {
   const [data, setData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [subject, setSubject] = useState(null);
-  const [topic, setTopic] = useState(null);
-  const [additionalReq, setAdditionalReq] = useState(null);
-  useEffect(() => {
-    // if (subject && topic && additionalReq) {
-      fetch(API_URL, {
-        headers: {
-          'subject': subject,
-          'topic': topic,
-          'additionalReq': additionalReq
+  const isFirstRender = useRef(true);
+
+  const fetchData = (subject, topic, additionalReq) => {
+    console.log('Fetching data with:', { subject, topic, additionalReq });
+    setLoading(true);
+    setError(null);
+    fetch(API_URL, {
+      headers: {
+        'subject': subject,
+        'topic': topic,
+        'additionalReq': additionalReq
+      }
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
         }
+        return res.json();
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err);
-          setLoading(false);
-        });
-    // }
+      .then((data) => {
+        setData(data);
+        setCurrentIndex(0);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchData(subject, topic, additionalReq);
   }, [subject, topic, additionalReq]);
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
-  if (error) return <p className="text-center text-lg text-red-500">Error loading data.</p>;
-  if (!data) return <p className="text-center text-lg">No data available.</p>;
+  if (error) return <p className="text-center text-lg text-red-500">Error: {error}</p>;
+  if (!data || !data.sections || data.sections.length === 0) return <p className="text-center text-lg">No data available.</p>;
 
   const currentSection = data.sections[currentIndex];
 
@@ -92,16 +102,16 @@ function StudyPage() {
         <Card className="my-40 w-[400px] min-h-[300px] max-h-[600px] text-center bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
           <CardHeader>
             <CardTitle className="text-black/90 font-newstar text-4xl">
-              {currentSection.type === "teaching" ? "Teaching" : currentSection.type === "question" ? "Question" : "Upcoming Content"}
+              {currentSection?.type === "teaching" ? "Teaching" : currentSection?.type === "question" ? "Question" : "Upcoming Content"}
             </CardTitle>
             <CardDescription className="text-black/70 font-newstar text-2xl">
-              {currentSection.type === "question" ? "Quiz Time!" : currentSection.type === "teaching" ? "Learn Something New" : "Stay Tuned!"}
+              {currentSection?.type === "question" ? "Quiz Time!" : currentSection?.type === "teaching" ? "Learn Something New" : "Stay Tuned!"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {currentSection.type === "teaching" && <p className="text-black/80 font-serif">{currentSection.content}</p>}
+            {currentSection?.type === "teaching" && <p className="text-black/80 font-serif">{currentSection.content}</p>}
 
-            {currentSection.type === "question" && (
+            {currentSection?.type === "question" && (
               <div>
                 <p className="font-semibold text-black/90 font-serif">{currentSection.question}</p>
                 <ul className="mt-2">
@@ -126,12 +136,17 @@ function StudyPage() {
               </div>
             )}
 
-            {currentSection.type === "upcoming_content" && (
+            {currentSection?.type === "upcoming_content" && (
               <div>
                 <p className="font-semibold">Upcoming Content</p>
                 <ul className="mt-2">
                   {currentSection.upcoming_topics.map((topic, index) => (
-                    <Button variant='ghost'key={index} className="p-2 border rounded-md mb-2" onClick={() =>{setTopic(topic); fetch(API_URL,{headers:{'subject': subject,'topic': topic,'additionalReq': additionalReq}})}} >
+                    <Button 
+                      variant='ghost' 
+                      key={index} 
+                      className="p-2 border rounded-md mb-2" 
+                      onClick={() => setTopic(topic)}
+                    >
                       {topic}
                     </Button>
                   ))}
