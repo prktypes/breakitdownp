@@ -23,7 +23,6 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
-  const isFirstRender = useRef(true);
 
   const fetchData = (subject, topic, additionalReq) => {
     console.log('Fetching data with:', { subject, topic, additionalReq });

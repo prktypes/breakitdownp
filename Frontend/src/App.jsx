@@ -101,7 +101,7 @@ function Home({ subject, setSubject, topic, setTopic, additionalReq, setAddition
       />
       <input 
         type="text" 
-        placeholder="Enter Additional Requirements" 
+        placeholder="Anything Else?" 
         value={additionalReq} 
         onChange={(e) => setAdditionalReq(e.target.value)} 
         className="mb-4 p-2 border rounded"
