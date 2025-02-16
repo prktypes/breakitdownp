@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { jellyTriangle } from 'ldrs'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 jellyTriangle.register()
 
@@ -18,7 +18,10 @@ jellyTriangle.register()
 
 const API_URL = "http://localhost:3000/api/data";
 
-function StudyPage({ subject, topic, setTopic, additionalReq }) {
+function StudyPage() {
+  const location = useLocation();
+  const { subject, topic, additionalReq } = location.state || {};
+
   const [data, setData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -26,7 +29,15 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
 
-  const fetchData = (subject, topic, additionalReq) => {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/'); // Redirect to home if not authenticated
+    }
+    fetchData();
+  }, [subject, topic, additionalReq, navigate]);
+
+  const fetchData = () => {
     console.log('Fetching data with:', { subject, topic, additionalReq });
     setLoading(true);
     setError(null);
@@ -53,13 +64,31 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
       });
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/'); // Redirect to home if not authenticated
+  const handleOptionClick = (option) => {
+    setSelectedOption(option);
+    const currentSection = data?.sections[currentIndex];
+
+    if (currentSection && option === currentSection.answer) {
+      console.log("Correct answer!");
+      markActivityAsSolved(); // Update activity data when the user solves a question correctly
+    } else {
+      console.log("Incorrect answer!");
     }
-    fetchData(subject, topic, additionalReq);
-  }, [subject, topic, additionalReq, navigate]);
+  };
+
+  const markActivityAsSolved = () => {
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const storedActivityData = JSON.parse(localStorage.getItem('activityData')) || [];
+    
+    const existingEntry = storedActivityData.find(item => item.date === today);
+    if (existingEntry) {
+      existingEntry.count += 1; // Increment the count for today
+    } else {
+      storedActivityData.push({ date: today, count: 1 }); // Add today's date with a count of 1
+    }
+
+    localStorage.setItem('activityData', JSON.stringify(storedActivityData)); // Update local storage
+  };
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-lg text-red-500">Error: {error}</p>;
@@ -79,16 +108,6 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
     }
   };
 
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
-    if(option === currentSection.answer) {
-      
-      console.log("Correct answer!");
-    } else {
-      // Handle incorrect answer
-      console.log("Incorrect answer!");
-    }
-  };
   const handleUpcomingTopicClick = (subject,topic,additionalReq) => {
     console.log(subject,topic,additionalReq);
   };
@@ -149,7 +168,7 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
                       variant='ghost' 
                       key={index} 
                       className="p-2 border rounded-md mb-2" 
-                      onClick={() =>{ setTopic(topic); setCurrentIndex(0)}}
+                      onClick={() =>{ setCurrentIndex(0)}}
                     >
                       {topic}
                     </Button>
