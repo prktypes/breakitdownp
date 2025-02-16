@@ -20,6 +20,7 @@ jellyTriangle.register()
 // Default values shown
 
 const API_URL = "http://localhost:3000/api/data";
+const SAVE_CARD_URL = "http://localhost:3000/api/user/card";
 
 
 function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdditionalReq }) {
@@ -63,6 +64,34 @@ function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdd
     }
   };
 
+  const handleSaveCard = async () => {
+    if (!data || !data.sections || data.sections.length === 0) return;
+
+    const currentSection = data.sections[currentIndex];
+    const title = currentSection.type === "teaching" ? "Teaching" : "Question";
+    const content = currentSection.content || currentSection.question;
+
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(SAVE_CARD_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, content })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save card');
+      }
+
+      const result = await response.json();
+      console.log('Card saved:', result);
+    } catch (err) {
+      console.error('Error saving card:', err);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -168,7 +197,7 @@ function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdd
               >
                 Previous
               </Button>
-              <Button variant="outline">
+               <Button variant="outline" onClick={handleSaveCard}>
                 <Bookmark className="mr-2" />
                 Save
               </Button>
