@@ -10,8 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { jellyTriangle } from 'ldrs'
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
+
 
 jellyTriangle.register()
 
@@ -20,7 +22,9 @@ jellyTriangle.register()
 const API_URL = "http://localhost:3000/api/data";
 const SAVE_CARD_URL = "http://localhost:3000/api/user/card";
 
+
 function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdditionalReq }) {
+
   const [data, setData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,6 +32,7 @@ function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdd
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+
 
   const fetchData = async (subject, topic, additionalReq) => {
     console.log('Fetching data with:', { subject, topic, additionalReq });
@@ -114,16 +119,6 @@ function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdd
     }
   };
 
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
-    if(option === currentSection.answer) {
-      
-      console.log("Correct answer!");
-    } else {
-      // Handle incorrect answer
-      console.log("Incorrect answer!");
-    }
-  };
   const handleUpcomingTopicClick = (subject,topic,additionalReq) => {
     console.log(subject,topic,additionalReq);
   };
@@ -184,7 +179,7 @@ function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdd
                       variant='ghost' 
                       key={index} 
                       className="p-2 border rounded-md mb-2" 
-                      onClick={() =>{ setTopic(topic); setCurrentIndex(0)}}
+                      onClick={() =>{ setCurrentIndex(0)}}
                     >
                       {topic}
                     </Button>
