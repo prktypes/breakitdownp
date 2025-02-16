@@ -102,6 +102,37 @@ app.post("/api/user", checkJwt, async (req, res) => {
   }
 });
 
+app.post("/api/user/card", checkJwt, async (req, res) => {
+  try {
+    const auth0Id = req.auth.payload.sub; // Get Auth0 ID from token
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ error: "Title and content are required" });
+    }
+
+    // Find the user
+    let user = await User.findOne({ auth0Id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Add the new card to the user's cards sub-collection
+    user.cards.push({ title, content });
+    await user.save();
+
+    console.log("Saved card for user:", user);
+    res.json(user);
+  } catch (error) {
+    console.error("Server error details:", error);
+    res.status(500).json({
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
+  }
+});
+
 // Start the Express server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
