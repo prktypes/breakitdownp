@@ -1,15 +1,24 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react';
+import { authConfig } from './auth0-config';
 import StudyPage from "./pages/StudyPage";
-import AdminDashboard from "./pages/AdminDashboard"; // Import the AdminDashboard component
+import AdminDashboard from "./pages/AdminDashboard";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import axios from 'axios';
 import './App.css'; // Add your CSS for modal styling
 import { useNavigate } from 'react-router-dom'; // Make sure this is imported
-import { clearTokenIfExpired } from './utils/auth';
-import AuthModal from './components/AuthModal';
 
 function App() {
+  return (
+    <Auth0Provider {...authConfig}>
+      <AppContent />
+    </Auth0Provider>
+  );
+}
+
+function AppContent() {
+  const { isAuthenticated, loginWithRedirect, logout, user, isLoading, getAccessTokenSilently } = useAuth0();
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [additionalReq, setAdditionalReq] = useState("");
@@ -20,25 +29,55 @@ function App() {
   const [isLogin, setIsLogin] = useState(true); // Toggle between login and signup
   const navigate = useNavigate(); // Initialize useNavigate
 
+  useEffect(() => {
+    const updateUserInDB = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const token = await getAccessTokenSilently();
+          console.log('Updating user with data:', {
+            email: user.email,
+            name: user.name,
+            picture: user.picture
+          });
+
+          const response = await fetch('http://localhost:3000/api/user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              email: user.email,
+              name: user.name,
+              picture: user.picture
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update user');
+          }
+
+          const result = await response.json();
+          console.log('User updated successfully:', result);
+        } catch (error) {
+          console.error('Error updating user:', error);
+        }
+      }
+    };
+
+    updateUserInDB();
+  }, [isAuthenticated, user, getAccessTokenSilently]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   const handleStartLearning = () => {
-    console.log('Start Learning clicked');
-    // Check if token exists
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.log('No token found, showing modal');
-      setRedirectPath('/study');
-      setShowModal(true);
+    if (!isAuthenticated) {
+      loginWithRedirect();
       return;
     }
-    
-    // If token exists, check if expired
-    if (clearTokenIfExpired()) {
-      console.log('Token expired, showing modal');
-      setRedirectPath('/study');
-      setShowModal(true);
-      return;
-    }
-    
     navigate('/study');
   };
 
@@ -64,33 +103,29 @@ function App() {
           <div className="container mx-auto">
             <ul className="flex gap-6 justify-center items-center p-4">
               <li>
-                <Link 
-                  to="/" 
-                  className="text-black/80 hover:text-black transition-colors"
-                >
+                <Link to="/" className="text-black/80 hover:text-black transition-colors">
                   Home
                 </Link>
               </li>
-              
               <li>
-                <Link 
-                  to="/dashboard" 
-                  className="text-black/80 hover:text-black transition-colors"
-                >
-                </Link>
-                <Link 
-                  to="/admin" 
-                  className="text-black/80 hover:text-black transition-colors"
-                >
-                  DashBoard
+                <Link to="/admin" className="text-black/80 hover:text-black transition-colors">
+                  Dashboard
                 </Link>
               </li>
+              {isAuthenticated ? (
+                <li>
+                  <button 
+                    onClick={() => logout({ returnTo: window.location.origin })}
+                    className="text-black/80 hover:text-black transition-colors"
+                  >
+                    Logout
+                  </button>
+                </li>
+              ) : null}
             </ul>
           </div>
         </div>
       </nav>
-
-      <AuthModal showModal={showModal} setShowModal={setShowModal} redirectPath={redirectPath} />
 
       <main className="container mx-auto px-4 pt-16">
         <Routes>
@@ -105,15 +140,33 @@ function App() {
               onStartLearning={handleStartLearning}
             />
           } />
-          <Route path="/study" element={
-            <StudyPage 
-              subject={subject} 
-              topic={topic} 
-              setTopic={setTopic}
-              additionalReq={additionalReq} 
-            />
-          } />
-          <Route path="/admin" element={<AdminDashboard />} /> {/* Add Admin Dashboard Route */}
+          <Route 
+            path="/study" 
+            element={
+              isAuthenticated ? (
+                <StudyPage 
+                  subject={subject}
+                  topic={topic}
+                  additionalReq={additionalReq}
+                  setSubject={setSubject}
+                  setTopic={setTopic}
+                  setAdditionalReq={setAdditionalReq}
+                />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              isAuthenticated ? (
+                <AdminDashboard />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            } 
+          />
         </Routes>
       </main>
     </div>

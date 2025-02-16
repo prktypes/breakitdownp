@@ -10,7 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { jellyTriangle } from 'ldrs'
-import { useNavigate, useLocation } from 'react-router-dom';
+
+import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+
 
 jellyTriangle.register()
 
@@ -18,77 +21,56 @@ jellyTriangle.register()
 
 const API_URL = "http://localhost:3000/api/data";
 
-function StudyPage() {
-  const location = useLocation();
-  const { subject, topic, additionalReq } = location.state || {};
+
+function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdditionalReq }) {
 
   const [data, setData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/'); // Redirect to home if not authenticated
-    }
-    fetchData();
-  }, [subject, topic, additionalReq, navigate]);
 
-  const fetchData = () => {
+  const fetchData = async (subject, topic, additionalReq) => {
     console.log('Fetching data with:', { subject, topic, additionalReq });
     setLoading(true);
     setError(null);
-    fetch(API_URL, {
-      headers: {
-        'subject': subject,
-        'topic': topic,
-        'additionalReq': additionalReq
-      }
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'subject': subject,
+          'topic': topic,
+          'additionalReq': additionalReq
         }
-        return res.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
       });
-  };
-
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
-    const currentSection = data?.sections[currentIndex];
-
-    if (currentSection && option === currentSection.answer) {
-      console.log("Correct answer!");
-      markActivityAsSolved(); // Update activity data when the user solves a question correctly
-    } else {
-      console.log("Incorrect answer!");
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const markActivityAsSolved = () => {
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-    const storedActivityData = JSON.parse(localStorage.getItem('activityData')) || [];
-    
-    const existingEntry = storedActivityData.find(item => item.date === today);
-    if (existingEntry) {
-      existingEntry.count += 1; // Increment the count for today
-    } else {
-      storedActivityData.push({ date: today, count: 1 }); // Add today's date with a count of 1
-    }
 
-    localStorage.setItem('activityData', JSON.stringify(storedActivityData)); // Update local storage
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
+    }
+    fetchData(subject, topic, additionalReq);
+  }, [isAuthenticated, navigate, subject, topic, additionalReq]);
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-lg text-red-500">Error: {error}</p>;
