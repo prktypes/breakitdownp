@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { jellyTriangle } from 'ldrs'
+import { useNavigate } from 'react-router-dom';
 
 jellyTriangle.register()
 
@@ -23,6 +24,7 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
+  const navigate = useNavigate();
 
   const fetchData = (subject, topic, additionalReq) => {
     console.log('Fetching data with:', { subject, topic, additionalReq });
@@ -43,7 +45,6 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
       })
       .then((data) => {
         setData(data);
-        setCurrentIndex(0);
         setLoading(false);
       })
       .catch((err) => {
@@ -53,8 +54,12 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/'); // Redirect to home if not authenticated
+    }
     fetchData(subject, topic, additionalReq);
-  }, [subject, topic, additionalReq]);
+  }, [subject, topic, additionalReq, navigate]);
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-lg text-red-500">Error: {error}</p>;
@@ -144,7 +149,7 @@ function StudyPage({ subject, topic, setTopic, additionalReq }) {
                       variant='ghost' 
                       key={index} 
                       className="p-2 border rounded-md mb-2" 
-                      onClick={() => setTopic(topic)}
+                      onClick={() =>{ setTopic(topic); setCurrentIndex(0)}}
                     >
                       {topic}
                     </Button>
