@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { jellyTriangle } from 'ldrs'
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 jellyTriangle.register()
 
@@ -18,48 +19,52 @@ jellyTriangle.register()
 
 const API_URL = "http://localhost:3000/api/data";
 
-function StudyPage({ subject, topic, setTopic, additionalReq }) {
+function StudyPage({ subject, topic, additionalReq, setSubject, setTopic, setAdditionalReq }) {
   const [data, setData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
 
-  const fetchData = (subject, topic, additionalReq) => {
+  const fetchData = async (subject, topic, additionalReq) => {
     console.log('Fetching data with:', { subject, topic, additionalReq });
     setLoading(true);
     setError(null);
-    fetch(API_URL, {
-      headers: {
-        'subject': subject,
-        'topic': topic,
-        'additionalReq': additionalReq
-      }
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'subject': subject,
+          'topic': topic,
+          'additionalReq': additionalReq
         }
-        return res.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
       });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/'); // Redirect to home if not authenticated
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
     }
     fetchData(subject, topic, additionalReq);
-  }, [subject, topic, additionalReq, navigate]);
+  }, [isAuthenticated, navigate, subject, topic, additionalReq]);
 
   if (loading) return <p className="text-center text-lg">Loading...</p>;
   if (error) return <p className="text-center text-lg text-red-500">Error: {error}</p>;
