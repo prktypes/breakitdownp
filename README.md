@@ -19,17 +19,17 @@ BreakItDown is an AI-powered adaptive learning platform designed to enhance know
 
 ### Backend:
 - Node.js with Express.js (API development)
-- PostgreSQL / MongoDB (Database management)
+- MongoDB (Database management)
 
 ### Authentication:
-- Firebase / Supabase / Auth0 (User authentication and security)
+- Auth0 (User authentication and security)
 
 ### Hosting & Deployment:
 - Vercel (Frontend hosting)
-- Railway / Render (Backend deployment)
+- Render (Backend deployment)
 
 ### AI & Machine Learning:
-- OpenAI API / Llama3 / Mixtral (AI-driven learning optimizations)
+- Gemini API (AI-driven learning optimizations)
 
 ## 🧠 Scientific Principles Used
 - **Cognitive Load Theory** - Minimizes unnecessary distractions to improve learning efficiency.
