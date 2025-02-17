@@ -73,9 +73,9 @@ BreakItDown is an AI-powered adaptive learning platform designed to enhance know
    Create a `.env` file and add the required API keys for authentication and AI services.
 
 ## 👥 Contributors
-- [Your Name](https://github.com/your-profile)
-- Team Member 1
-- Team Member 2
+- [Prakkhar Prassun](https://github.com/prktypes)
+- [Ayush Popat]
+- [Madhav Goel]
 
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
